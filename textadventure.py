@@ -17,7 +17,6 @@ class Game(object):
     switch2_name = "left"
     switch3_name = "right"
 
-
     def get_option(self, options):
         complete = False
         while not complete:
@@ -48,9 +47,32 @@ class Game(object):
             self.heat3 += 1
         return user_input
 
+    def get_option2(self, options):
+        complete = False
+        while not complete:
+            sys.stdout.write("> ")
+            command = raw_input()
+            for key,value in options.iteritems():
+                if command.startswith(key):
+                    value()
+                    complete = True
+        
+        if self.heat1 > 0 and not self.switch1:
+            self.heat1 -= 1
+        elif self.switch1:
+            self.heat1 += 1
+        if self.heat2 > 0 and not self.switch2:
+            self.heat2 -= 1
+        elif self.switch2:
+            self.heat2 += 1
+        if self.heat3 > 0 and not self.switch3:
+            self.heat3 -= 1
+        elif self.switch3:
+            self.heat3 += 1
+
     def cellar(self):
         print "--------------------------------------"
-        print "You are in the cellar. There are three switches on the wall."
+        print "You are in the cellar. There are three switches on the wall. There are stairs going upwards."
 
         if self.switch1:
             print "The left switch is in the `on` position"
@@ -69,27 +91,27 @@ class Game(object):
 
         print "--------------------------------------"
 
-        option = self.get_option([
-                "Walk upstairs",
-                "Press the left switch",
-                "Press the middle switch",
-                "Press the right switch",
-                "Wait",
-            ])
+        self.get_option2({
+            "walk up": self.room,
+            "touch left": self.press1,
+            "touch middle": self.press2,
+            "touch right": self.press3,
+            "wait": self.wait,
+            "exit": self.no_exit,
+            "quit": sys.exit,
+            })
 
-        if option == 1:
-            self.switch1 = not self.switch1
-        elif option == 2:
-            self.switch2 = not self.switch2
-        elif option == 3:
-            self.switch3 = not self.switch3
-        elif option == 4:
-            print "--------------------------------------"
-            print "You wait for a bit..."
-            print "--------------------------------------"
-        elif option == 0:
-            return self.room()
         self.cellar()
+
+    def wait(self):
+        print "--------------------------------------"
+        print "You wait for a bit..."
+        print "--------------------------------------"
+    
+    def no_exit(self):
+        print "--------------------------------------"
+        print "There is no exit in this room"
+        print "--------------------------------------"
 
     def get_bulb_state(self, s):
         if self.switch1_name == s:
@@ -106,6 +128,14 @@ class Game(object):
             return self.heat2
         else:
             return self.heat3    
+        self.cellar()
+
+    def press1(self):
+        self.switch1 = not self.switch1
+    def press2(self):
+        self.switch2 = not self.switch2
+    def press3(self):
+        self.switch3 = not self.switch3
 
     def room(self):
         print "--------------------------------------"
@@ -136,31 +166,19 @@ class Game(object):
         else:
             print "the right bulb is off"
 
+        print "There is a broken stairway going down, and a door marked 'exit'"
+
         print "--------------------------------------"
 
-        option = self.get_option([
-                "Walk downstairs",
-                "Touch left bulb",
-                "Touch middle bulb",
-                "Touch right bulb",
-                "Wait",
-                "Exit door"
-            ])
-
-        if option == 0:
-            return self.die()
-        if option == 1:
-            self.touch_1()
-        if option == 2:
-            self.touch_2()
-        if option == 3:
-            self.touch_3()
-        elif option == 4:
-            print "--------------------------------------"
-            print "You wait for a bit..."
-            print "--------------------------------------"
-        if option == 5:
-            self.exit_door()
+        self.get_option2({
+            "walk down": self.die,
+            "touch left": self.touch_1,
+            "touch middle": self.touch_2,
+            "touch right": self.touch_3,
+            "wait": self.wait,
+            "exit": self.exit_door,
+            "quit": sys.exit,
+        })
         self.room()
 
     def die(self):
@@ -240,7 +258,11 @@ class Game(object):
         self.switch2_name = options.pop()
         self.switch3_name = options.pop()
 
-        print "Welcome to our adventure."
+        print "Welcome to our adventure. Valid commands are: "
+        print "- touch (left|middle|right)"
+        print "- walk (up|down)stairs"
+        print "- exit"
+        print "- wait"
         self.cellar()
 
 game = Game()
